@@ -29,7 +29,7 @@ namespace WFarm.Program
             {
                 gpio.WriteChannel(GpioChannel.Seven, true);
                 Thread.Sleep(400);
-                gpio.WriteChannel(GpioChannel.Seven, false);
+                gpio.WriteChannel(GpioChannel.Four, false);
                 Thread.Sleep(200);
             }
         }
