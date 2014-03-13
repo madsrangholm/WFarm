@@ -1,62 +1,52 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
-
-// Pi# Namespaces
-using WFarm.Hardware.Gpio;
-using WFarm.Hardware.Gpio.Entities;
 using WFarm.Logic.Enums;
 using WFarm.Logic.Interfaces;
 
-namespace WFarm.Hardware
+namespace WFarm.Hardware.Gpio
 {
+
     public class GpioHandler : IGpioHandler
     {
-        //public GpioHardware(bool testMode)
-        //{
-        //    LibGpio.Gpio.TestMode = testMode;
-        //}
-
-        public void SetupChannel(GpioChannel channel, GpioDirection direction)
+        private IDictionary<EGpioChannel, IGpioChannel> _channels = new Dictionary<EGpioChannel, IGpioChannel>();
+        private readonly IGpioChannel _emptyChannel;//copying from this object when adding new channels. Fancy way of letting IOC create the object.
+        private readonly object _channelLock = new object();
+        public GpioHandler(IGpioChannel emptyChannel)
         {
-            LibGpio.Gpio.SetupChannel(TranslateChannel(channel), TranslateDirection(direction));
+            _emptyChannel = emptyChannel;
         }
 
-        public bool ReadChannel(GpioChannel channel)
+        public bool ReadChannel(EGpioChannel channel)
         {
-            return LibGpio.Gpio.ReadValue(TranslateChannel(channel));
-        }
-
-        public void WriteChannel(GpioChannel channel, bool value)
-        {
-            LibGpio.Gpio.OutputValue(TranslateChannel(channel), value);
-        }
-        #region convert to library enums
-        private RaspberryPinNumber TranslateChannel(GpioChannel channel)
-        {
-            switch (channel)
+            lock (_channelLock)
             {
-                case GpioChannel.Zero: return RaspberryPinNumber.Zero;
-                case GpioChannel.One: return RaspberryPinNumber.One;
-                case GpioChannel.Two: return RaspberryPinNumber.Two;
-                case GpioChannel.Three: return RaspberryPinNumber.Three;
-                case GpioChannel.Four: return RaspberryPinNumber.Four;
-                case GpioChannel.Five: return RaspberryPinNumber.Five;
-                case GpioChannel.Six: return RaspberryPinNumber.Six;
-                case GpioChannel.Seven:
-                default: return RaspberryPinNumber.Seven;
+                if (_channels.ContainsKey(channel)) return _channels[channel].Value;
+                var chan = (IGpioChannel)_emptyChannel.Clone();
+                chan.Setup(channel, EGpioDirection.Input);
+                _channels.Add(channel, chan);
+                return _channels[channel].Value;
             }
         }
 
-        private Direction TranslateDirection(GpioDirection direction)
+        public void WriteChannel(EGpioChannel channel, bool value)
         {
-            return direction == GpioDirection.Input
-                ? Direction.Input
-                : Direction.Output;
+            lock (_channelLock)
+            {
+                if (!_channels.ContainsKey(channel))
+                {
+                    var chan = (IGpioChannel)_emptyChannel.Clone();
+                    chan.Setup(channel, EGpioDirection.Output);
+                    _channels.Add(channel, chan);
+                }
+                _channels[channel].Value = value;
+            }
         }
-        #endregion
+
+
     }
 }

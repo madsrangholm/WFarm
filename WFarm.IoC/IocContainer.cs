@@ -10,6 +10,7 @@ using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Facilities.TypedFactory;
 using Castle.Windsor;
 using WFarm.Hardware;
+using WFarm.Hardware.Gpio;
 using WFarm.Logic.Interfaces;
 using Component = Castle.MicroKernel.Registration.Component;
 
@@ -22,6 +23,7 @@ namespace WFarm.IoC
         {
             Contract.Assume(container != null);
             container.Register(Component.For<IGpioHandler>().ImplementedBy<GpioHandler>().LifestyleTransient());
+            container.Register(Component.For<IGpioChannel>().ImplementedBy<GpioChannel>().LifestyleTransient());
             //container.AddFacility<TypedFactoryFacility>();
             //container.Register(Component.For<ICardFactory>().AsFactory());
             //container.Register(Component.For<ICard>().ImplementedBy<Card>().LifestyleTransient());

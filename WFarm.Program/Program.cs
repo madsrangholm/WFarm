@@ -24,12 +24,11 @@ namespace WFarm.Program
 
         public Program(IGpioHandler gpio)
         {
-            gpio.SetupChannel(GpioChannel.Seven, GpioDirection.Output);
             for (var i = 0; i < 10; i++)
             {
-                gpio.WriteChannel(GpioChannel.Seven, true);
+                gpio.WriteChannel(EGpioChannel.Four, true);
                 Thread.Sleep(400);
-                gpio.WriteChannel(GpioChannel.Seven, false);
+                gpio.WriteChannel(EGpioChannel.Four, false);
                 Thread.Sleep(200);
             }
         }

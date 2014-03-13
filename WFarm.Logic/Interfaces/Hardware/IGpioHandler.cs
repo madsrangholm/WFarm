@@ -9,8 +9,7 @@ namespace WFarm.Logic.Interfaces
 {
     public interface IGpioHandler
     {
-        void SetupChannel(GpioChannel channel, GpioDirection direction);
-        bool ReadChannel(GpioChannel channel);
-        void WriteChannel(GpioChannel channel, bool value);
+        bool ReadChannel(EGpioChannel channel);
+        void WriteChannel(EGpioChannel channel, bool value);
     }
 }
