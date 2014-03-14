@@ -3,25 +3,26 @@ using System.IO;
 using WFarm.Logic.Enums;
 using WFarm.Logic.Exceptions;
 using WFarm.Logic.Interfaces;
+using WFarm.Logic.Interfaces.Hardware;
 
 namespace WFarm.Hardware.Gpio
 {
     public class GpioChannel : IGpioChannel
     {
-        private static readonly object FileSystemLock = new object();
+        /// <summary>
+        /// Used for enforcing that only one thread can access files of a specific channel at once to prevent raceconditions.
+        /// </summary>
+        private readonly object _chanLock = new object();
 
-        private static string GpioPath
+        private string GpioPath
         {
             get
             {
-                switch (Environment.OSVersion.Platform)
+                switch (_config.SystemPlatform)
                 {
-                    case PlatformID.WinCE:
-                    case PlatformID.Win32S:
-                    case PlatformID.Win32Windows:
-                    case PlatformID.Win32NT:
+                    case ESystemPlatform.Windows:
                         return @"C:\RasPiGpioTest";
-                    case PlatformID.MacOSX:
+                    case ESystemPlatform.Mac:
                         return @"/tmp/RasPiGpioTest";
                     default:
                         return @"/sys/class/gpio";
@@ -29,14 +30,18 @@ namespace WFarm.Hardware.Gpio
             }
         }
 
-        
-
         public EGpioDirection Direction { get; set; }
-
         public EGpioChannel Channel { get; set; }
+        private bool _isInitialized;
         private string GpioDir
         {
             get { return Path.Combine(GpioPath, string.Format("gpio{0}", (int) Channel)); }
+        }
+
+        private readonly IHardwareConfig _config;
+        public GpioChannel(IHardwareConfig config)
+        {
+            _config = config;
         }
 
         public void Setup(EGpioChannel channel, EGpioDirection direction)
@@ -44,13 +49,18 @@ namespace WFarm.Hardware.Gpio
             Channel = channel;
             Direction = direction;
             Initialize();
+            _isInitialized = true;
         }
         public bool Value
         {
             get
             {
+                if(!_isInitialized) throw new GpioException("GpioChannel has not been set up yet. Invoke 'Setup' before attempting to read/write value");
                 if(Direction != EGpioDirection.Input) throw new GpioException(string.Format("Reading gpio{0} failed. This channel is not set as input",(int)Channel));
-                lock (FileSystemLock)
+#if DEBUG
+                Console.WriteLine("Reading value of gpio{0}", Channel);
+#endif
+                lock (_chanLock)
                 {
                     using (
                         var fileStream = new FileStream(Path.Combine(GpioDir, "value"), FileMode.Open, FileAccess.Read,
@@ -58,15 +68,24 @@ namespace WFarm.Hardware.Gpio
                     {
                         using (var streamReader = new StreamReader(fileStream))
                         {
-                            return streamReader.ReadToEnd().Trim() == "1";
+                            var result = streamReader.ReadToEnd().Trim() == "1";
+#if DEBUG
+                            Console.WriteLine("gpio{0} = {1}", Channel,result);
+#endif
+                            return result;
                         }
                     }
                 }
+                
             }
             set
             {
+                if (!_isInitialized) throw new GpioException("GpioChannel has not been set up yet. Invoke 'Setup' before attempting to read/write value");
                 if (Direction != EGpioDirection.Output) throw new GpioException(string.Format("Writing gpio{0} failed. This channel is not set as output", (int)Channel));
-                lock (FileSystemLock)
+#if DEBUG
+                Console.WriteLine("Writing value {0} to gpio{1}",value, Channel);
+#endif
+                lock (_chanLock)
                 {
                     using (
                         var fileStream = new FileStream(Path.Combine(GpioDir, "value"), FileMode.Truncate,
@@ -90,7 +109,7 @@ namespace WFarm.Hardware.Gpio
 
         private void Export()
         {
-            lock (FileSystemLock)
+            lock (_chanLock)
             {
                 using (
                     var fileStream = new FileStream(Path.Combine(GpioPath, "export"), FileMode.Truncate,
@@ -107,7 +126,7 @@ namespace WFarm.Hardware.Gpio
 
         private void SetDirection()
         {
-            lock (FileSystemLock)
+            lock (_chanLock)
             {
                 using (
                     var fileStream = new FileStream(Path.Combine(GpioDir, "direction"), FileMode.Truncate,

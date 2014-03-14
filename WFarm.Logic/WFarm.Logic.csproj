@@ -40,10 +40,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Enums\EGpio.cs" />
+    <Compile Include="Enums\EGpioChannel.cs" />
+    <Compile Include="Enums\EGpioDirection.cs" />
+    <Compile Include="Enums\ESystemPlatform.cs" />
     <Compile Include="Exceptions\GpioException.cs" />
     <Compile Include="Interfaces\Hardware\IGpioChannel.cs" />
     <Compile Include="Interfaces\Hardware\IGpioHandler.cs" />
+    <Compile Include="Interfaces\Hardware\IHardwareConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup />

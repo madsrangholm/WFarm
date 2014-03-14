@@ -12,10 +12,4 @@ namespace WFarm.Logic.Enums
         Twentyfour = 24, 
         Twentyfive = 25
     }
-
-    public enum EGpioDirection
-    {
-        Input = 0, 
-        Output = 1
-    }
 }

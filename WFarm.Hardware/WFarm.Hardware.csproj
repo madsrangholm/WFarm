@@ -42,7 +42,7 @@
   <ItemGroup>
     <Compile Include="Gpio\GpioChannel.cs" />
     <Compile Include="GpioHandler.cs" />
-    <Compile Include="Gpio\LibGpio.cs" />
+    <Compile Include="HardwareConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
