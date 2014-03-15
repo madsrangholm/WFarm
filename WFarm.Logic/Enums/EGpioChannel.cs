@@ -4,6 +4,7 @@ namespace WFarm.Logic.Enums
     public enum EGpioChannel
     {
         Four = 4, 
+        Seven = 7,
         Seventeen = 17, 
         Eightteen = 18 ,
         Twentyone = 21, 

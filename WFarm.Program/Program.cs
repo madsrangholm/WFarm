@@ -26,9 +26,9 @@ namespace WFarm.Program
         {
             for (var i = 0; i < 10; i++)
             {
-                gpio.WriteChannel(EGpioChannel.Seventeen, true);
+                gpio.WriteChannel(EGpioChannel.Seven, true);
                 Thread.Sleep(400);
-                gpio.WriteChannel(EGpioChannel.Seventeen, false);
+                gpio.WriteChannel(EGpioChannel.Seven, false);
                 Thread.Sleep(200);
             }
         }
