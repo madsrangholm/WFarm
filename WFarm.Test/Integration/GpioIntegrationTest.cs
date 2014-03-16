@@ -1,13 +1,11 @@
-﻿using System;
+﻿using Castle.MicroKernel.Registration;
+using Castle.Windsor;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Castle.MicroKernel.Registration;
-using Castle.Windsor;
-using Castle.Windsor.Installer;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Core;
+using NUnit.Framework;
 using WFarm.Hardware;
 using WFarm.Hardware.Gpio;
 using WFarm.Logic.Enums;
@@ -17,7 +15,7 @@ using WFarm.Logic.Interfaces.Hardware;
 
 namespace WFarm.Test.Integration
 {
-    [TestClass]
+    [TestFixture]
     public class GpioIntegrationTest : TestBase
     {
         private readonly IWindsorContainer _container;
@@ -40,7 +38,7 @@ namespace WFarm.Test.Integration
             _container = new WindsorContainer();
             _container.Install(new Container());
         }
-        [TestCategory("Integration"), TestMethod]
+        [Test]
         public void TestReadChannels()
         {
             var handler =_container.Resolve<IGpioHandler>();
@@ -49,7 +47,7 @@ namespace WFarm.Test.Integration
                 handler.ReadChannel(channel);
             }
         }
-        [TestCategory("Integration"), TestMethod]
+        [Test]
         public void TestWriteChannels()
         {
             var handler = _container.Resolve<IGpioHandler>();
@@ -59,6 +57,7 @@ namespace WFarm.Test.Integration
                 handler.WriteChannel(channel, true);
             }
         }
+        [Test]
         [ExpectedException(typeof(GpioException))]
         public void TestReadWriteChannels()
         {

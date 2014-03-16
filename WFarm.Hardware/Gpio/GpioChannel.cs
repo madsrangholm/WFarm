@@ -57,24 +57,10 @@ namespace WFarm.Hardware.Gpio
             {
                 if(!_isInitialized) throw new GpioException("GpioChannel has not been set up yet. Invoke 'Setup' before attempting to read/write value");
                 if(Direction != EGpioDirection.Input) throw new GpioException(string.Format("Reading gpio{0} failed. This channel is not set as input",(int)Channel));
-#if DEBUG
                 Console.WriteLine("Reading value of gpio{0}", Channel);
-#endif
                 lock (_chanLock)
                 {
-                    using (
-                        var fileStream = new FileStream(Path.Combine(GpioDir, "value"), FileMode.Open, FileAccess.Read,
-                            FileShare.ReadWrite))
-                    {
-                        using (var streamReader = new StreamReader(fileStream))
-                        {
-                            var result = streamReader.ReadToEnd().Trim() == "1";
-#if DEBUG
-                            Console.WriteLine("gpio{0} = {1}", Channel,result);
-#endif
-                            return result;
-                        }
-                    }
+                    return ReadFile(Path.Combine(GpioDir, "value"));
                 }
                 
             }
@@ -87,16 +73,7 @@ namespace WFarm.Hardware.Gpio
 #endif
                 lock (_chanLock)
                 {
-                    using (
-                        var fileStream = new FileStream(Path.Combine(GpioDir, "value"), FileMode.Truncate,
-                            FileAccess.Write, FileShare.ReadWrite))
-                    {
-                        using (var streamWriter = new StreamWriter(fileStream))
-                        {
-                            streamWriter.Write(value ? "1" : "0");
-                            streamWriter.Flush();
-                        }
-                    }
+                    Writefile(Path.Combine(GpioDir, "value"), value ? "1" : "0");
                 }
             }
         }
@@ -111,15 +88,21 @@ namespace WFarm.Hardware.Gpio
         {
             lock (_chanLock)
             {
-                using (
-                    var fileStream = new FileStream(Path.Combine(GpioPath, "export"), FileMode.Truncate,
-                        FileAccess.Write, FileShare.ReadWrite))
+
+                if (_config.SystemPlatform == ESystemPlatform.Windows) //create folders manually
                 {
-                    using (var streamWriter = new StreamWriter(fileStream))
+                    if (!Directory.Exists(GpioDir))
                     {
-                        streamWriter.Write((int) Channel);
-                        streamWriter.Flush();
+                        Directory.CreateDirectory(GpioDir);
+                        File.Create(Path.Combine(GpioDir, "direction")).Close();
+                        Writefile(Path.Combine(GpioDir, "direction"),"in");
+                        File.Create(Path.Combine(GpioDir, "value")).Close();
+                        Writefile(Path.Combine(GpioDir, "value"), "0");
                     }
+                }
+                else
+                {
+                    Writefile(Path.Combine(GpioPath, "export"), ((int) Channel).ToString());
                 }
             }
         }
@@ -128,18 +111,37 @@ namespace WFarm.Hardware.Gpio
         {
             lock (_chanLock)
             {
-                using (
-                    var fileStream = new FileStream(Path.Combine(GpioDir, "direction"), FileMode.Truncate,
-                        FileAccess.Write, FileShare.ReadWrite))
+                Writefile(Path.Combine(GpioDir, "direction"), Direction == EGpioDirection.Input ? "in" : "out");
+            }
+        }
+
+        private bool ReadFile(string path)
+        {
+            using (var fileStream = new FileStream(Path.Combine(path,""), 
+                FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            {
+                using (var streamReader = new StreamReader(fileStream))
                 {
-                    using (var streamWriter = new StreamWriter(fileStream))
-                    {
-                        streamWriter.Write(Direction == EGpioDirection.Input ? "in" : "out");
-                        streamWriter.Flush();
-                    }
+                    var result = streamReader.ReadToEnd().Trim() == "1";
+                    Console.WriteLine("gpio{0} = {1}", Channel, result);
+                    return result;
                 }
             }
         }
+
+        private void Writefile(string path, string value)
+        {
+            using (var fileStream = new FileStream(Path.Combine(path, ""), 
+                        FileMode.Truncate, FileAccess.Write, FileShare.ReadWrite))
+            {
+                using (var streamWriter = new StreamWriter(fileStream))
+                {
+                    streamWriter.Write(value);
+                    streamWriter.Flush();
+                }
+            }
+        }
+
 
         public object Clone()
         {
