@@ -11,6 +11,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WFarm.Hardware", "WFarm.Har
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WFarm.Program", "WFarm.Program\WFarm.Program.csproj", "{E496A422-3AA3-44B6-BEEB-FD76623C0E25}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WFarm.Test", "WFarm.Test\WFarm.Test.csproj", "{ECDBFB9D-E0C3-4168-99EF-F195048982AF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{405E9027-186A-4041-853A-706E23AB2AA8} = {405E9027-186A-4041-853A-706E23AB2AA8}
+		{FF65E749-D555-490D-83EB-DA1E3840D49D} = {FF65E749-D555-490D-83EB-DA1E3840D49D}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +39,10 @@ Global
 		{E496A422-3AA3-44B6-BEEB-FD76623C0E25}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E496A422-3AA3-44B6-BEEB-FD76623C0E25}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E496A422-3AA3-44B6-BEEB-FD76623C0E25}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ECDBFB9D-E0C3-4168-99EF-F195048982AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ECDBFB9D-E0C3-4168-99EF-F195048982AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ECDBFB9D-E0C3-4168-99EF-F195048982AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ECDBFB9D-E0C3-4168-99EF-F195048982AF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -7,13 +7,14 @@ using System.Threading.Tasks;
 using System.Threading;
 using WFarm.Logic.Enums;
 using WFarm.Logic.Interfaces;
+using WFarm.Logic.Interfaces.Hardware;
 
 namespace WFarm.Hardware.Gpio
 {
 
     public class GpioHandler : IGpioHandler
     {
-        private IDictionary<EGpioChannel, IGpioChannel> _channels = new Dictionary<EGpioChannel, IGpioChannel>();
+        private readonly IDictionary<EGpioChannel, IGpioChannel> _channels = new Dictionary<EGpioChannel, IGpioChannel>();
         private readonly IGpioChannel _emptyChannel;//copying from this object when adding new channels. Fancy way of letting IOC create the object.
         private readonly object _channelLock = new object();
         public GpioHandler(IGpioChannel emptyChannel)
@@ -23,14 +24,11 @@ namespace WFarm.Hardware.Gpio
 
         public bool ReadChannel(EGpioChannel channel)
         {
-            lock (_channelLock)
-            {
-                if (_channels.ContainsKey(channel)) return _channels[channel].Value;
-                var chan = (IGpioChannel)_emptyChannel.Clone();
-                chan.Setup(channel, EGpioDirection.Input);
-                _channels.Add(channel, chan);
-                return _channels[channel].Value;
-            }
+            if (_channels.ContainsKey(channel)) return _channels[channel].Value;
+            var chan = (IGpioChannel)_emptyChannel.Clone();
+            chan.Setup(channel, EGpioDirection.Input);
+            _channels.Add(channel, chan);
+            return _channels[channel].Value;
         }
 
         public void WriteChannel(EGpioChannel channel, bool value)
@@ -43,8 +41,9 @@ namespace WFarm.Hardware.Gpio
                     chan.Setup(channel, EGpioDirection.Output);
                     _channels.Add(channel, chan);
                 }
-                _channels[channel].Value = value;
             }
+            
+            _channels[channel].Value = value;
         }
 
 

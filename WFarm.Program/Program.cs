@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Castle.Windsor;
 using WFarm.Logic.Enums;
 using WFarm.Logic.Interfaces;
+using WFarm.Logic.Interfaces.Hardware;
 
 namespace WFarm.Program
 {

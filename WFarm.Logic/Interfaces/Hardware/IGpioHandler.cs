@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WFarm.Logic.Enums;
+﻿using WFarm.Logic.Enums;
 
-namespace WFarm.Logic.Interfaces
+namespace WFarm.Logic.Interfaces.Hardware
 {
     public interface IGpioHandler
     {
